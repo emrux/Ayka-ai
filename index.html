@@ -265,5 +265,13 @@ if(history.length === 0) {
 }
 </script>
 
-</body>
+</body><script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .catch(error => console.log("AYKA:", error));
+  });
+}
+</script>
+
 </html>
