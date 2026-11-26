@@ -5,59 +5,80 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AYKA AI</title>
+
 <style>
+* { box-sizing: border-box; }
+
 body {
- margin:0;
- background:#10131b;
- color:white;
- font-family:Arial;
+ margin: 0;
+ background: #10131b;
+ color: white;
+ font-family: Arial, sans-serif;
 }
+
 header {
- padding:18px;
- text-align:center;
- background:#191f2c;
- color:#54c8ff;
+ padding: 20px;
+ text-align: center;
+ background: #191f2c;
+ color: #54c8ff;
 }
-#chat {
- height:65vh;
- overflow:auto;
- padding:12px;
-}
-.message {
- padding:12px;
- margin:10px 0;
- border-radius:14px;
- max-width:85%;
- overflow-wrap:anywhere;
-}
-.user {background:#245d91;margin-left:auto}
-.bot {background:#252d3b}
-footer {
- display:flex;
- gap:7px;
- padding:12px;
-}
-input {
- flex:1;
- min-width:0;
- padding:13px;
- border:0;
- border-radius:12px;
-}
-button {
- background:#168ed0;
- color:white;
- border:0;
- border-radius:12px;
- padding:12px;
-}
+
 #memory {
- padding:10px;
- color:#9eb3c9;
- font-size:13px;
+ padding: 12px;
+ color: #9eb3c9;
+ font-size: 14px;
+}
+
+#chat {
+ height: 65vh;
+ overflow-y: auto;
+ padding: 12px;
+}
+
+.message {
+ padding: 13px;
+ margin: 10px 0;
+ border-radius: 15px;
+ max-width: 88%;
+ white-space: pre-wrap;
+ overflow-wrap: anywhere;
+}
+
+.user {
+ background: #245d91;
+ margin-left: auto;
+}
+
+.bot {
+ background: #252d3b;
+}
+
+footer {
+ display: flex;
+ gap: 8px;
+ padding: 12px;
+}
+
+input {
+ flex: 1;
+ min-width: 0;
+ padding: 14px;
+ border: 0;
+ border-radius: 12px;
+ font-size: 16px;
+}
+
+button {
+ background: #168ed0;
+ color: white;
+ border: 0;
+ border-radius: 12px;
+ padding: 14px;
+ font-size: 18px;
 }
 </style>
 </head>
+
 <body>
 
 <header>
@@ -85,16 +106,24 @@ let memory = JSON.parse(
  localStorage.getItem("ayka_memory") || "[]"
 );
 
+function normalize(text) {
+ return text.toLowerCase()
+ .replaceAll("ə","e")
+ .replaceAll("ı","i")
+ .trim();
+}
+
 function save() {
  localStorage.setItem(
   "ayka_history", JSON.stringify(history)
  );
+
  localStorage.setItem(
   "ayka_memory", JSON.stringify(memory)
  );
 }
 
-function show(who,text) {
+function show(who, text) {
  let d = document.createElement("div");
  d.className = "message " + who;
  d.textContent = text;
@@ -102,85 +131,133 @@ function show(who,text) {
  chat.scrollTop = chat.scrollHeight;
 }
 
-function reply(t) {
- let q = t.toLowerCase();
+function updateMemory() {
+ document.getElementById("memory").textContent =
+ "🧠 Yaddaş: " + memory.length +
+ " məlumat saxlanılıb";
+}
 
- if(q.startsWith("yadda saxla:")) {
-  let fact = t.substring(t.indexOf(":")+1).trim();
-  if(!fact) return "Yadda saxlanacaq məlumat yaz.";
+function reply(t) {
+ let q = normalize(t);
+
+ // YADDAŞA MƏLUMAT ƏLAVƏ ET
+ if(q.startsWith("yadda saxla:") ||
+    q.startsWith("yadda saxla ")) {
+
+  let fact = t.substring(
+   t.indexOf("yadda") + 11
+  ).replace(/^:\s*/, "").trim();
+
+  if(!fact) return "Nəyi yadda saxlayım?";
+
   memory.push(fact);
   save();
   updateMemory();
+
   return "Bunu yaddaşıma yazdım: " + fact;
  }
 
- if(q === "yaddaşım") {
-  return memory.length
-   ? "Yaddaşımda olanlar:\n" + memory.map((x,i)=>(i+1)+". "+x).join("\n")
-   : "Hələ yaddaşımda məlumat yoxdur.";
+ // YADDAŞI GÖSTƏR
+ if(q.includes("yaddasim") ||
+    q.includes("yaddasimi")) {
+
+  if(memory.length === 0)
+   return "Hələ yaddaşımda məlumat yoxdur.";
+
+  return "Yaddaşımda olan məlumatlar:\n" +
+   memory.map((x,i)=>(i+1)+". "+x).join("\n");
  }
 
- if(q === "köhnə söhbətlər") {
-  return history.length
-   ? "Əvvəlki söhbətlərimiz:\n" +
-     history.slice(-10).map(x=>"Sən: "+x.user+"\nMən: "+x.bot).join("\n\n")
-   : "Hələ söhbət tarixçəm yoxdur.";
+ // KÖHNƏ SÖHBƏTLƏR
+ if(q.includes("kohne sohbet")) {
+
+  if(history.length === 0)
+   return "Hələ söhbət tarixçəm yoxdur.";
+
+  return history.slice(-10)
+   .map(x=>"Sən: "+x.user+"\nAYKA: "+x.bot)
+   .join("\n\n");
  }
 
+ // YADDAŞDAN MƏLUMAT SİL
+ if(q.startsWith("yaddasdan sil")) {
+  let value = t.substring(t.indexOf("sil")+3).trim();
+
+  let before = memory.length;
+
+  memory = memory.filter(
+   x => normalize(x) !== normalize(value)
+  );
+
+  save();
+  updateMemory();
+
+  return before === memory.length
+   ? "Bu məlumat yaddaşımda tapılmadı."
+   : "Məlumat yaddaşımdan silindi.";
+ }
+
+ // SALAMLAŞMA
  if(q.includes("salam"))
   return "Salam! Mən AYKA AI-yam. Necəsən?";
 
- if(q.includes("adın nədir"))
+ if(q.includes("adin nedir"))
   return "Mənim adım AYKA AI-dır!";
 
- if(q.includes("necəsən"))
+ if(q.includes("necəsən") || q.includes("necesen"))
   return "Yaxşıyam! Sən necəsən?";
 
  if(q.includes("saat"))
-  return "Saat: "+new Date().toLocaleTimeString("az-AZ");
+  return "İndiki saat: " +
+   new Date().toLocaleTimeString("az-AZ");
 
- if(q.includes("məni tanıyırsan") || q.includes("məni xatırlayırsan"))
+ if(q.includes("meni taniyirsan") ||
+    q.includes("meni xatirlayirsan"))
   return memory.length
    ? "Bəli! Yaddaşımda bunlar var:\n"+memory.join("\n")
    : "Hələ səni tanımaq üçün məlumatım yoxdur.";
 
- return "Bu suala hələ cavab verməyi öyrənməmişəm. Amma söhbətlərimizi yadda saxlayıram!";
-}
-
-function updateMemory() {
- document.getElementById("memory").textContent =
- "🧠 Yaddaş: "+memory.length+" məlumat saxlanılıb";
+ return "Bu suala hələ cavab verməyi öyrənməmişəm. Amma söhbətimizi yadda saxlayıram!";
 }
 
 function send() {
  let t = input.value.trim();
  if(!t) return;
 
- show("user",t);
- let a = reply(t);
- show("bot",a);
+ show("user", t);
 
- history.push({user:t,bot:a});
+ let a = reply(t);
+
+ show("bot", a);
+
+ history.push({
+  user: t,
+  bot: a
+ });
+
  save();
  updateMemory();
- input.value="";
+
+ input.value = "";
 }
 
-input.addEventListener("keydown",e=>{
- if(e.key==="Enter") send();
+input.addEventListener("keydown", e => {
+ if(e.key === "Enter") send();
 });
 
-history.forEach(x=>{
- show("user",x.user);
- show("bot",x.bot);
+history.forEach(x => {
+ show("user", x.user);
+ show("bot", x.bot);
 });
 
 updateMemory();
 
-if(history.length===0)
- show("bot","Salam! Mən AYKA AI-yam. Söhbətimiz yadda qalacaq!");
+if(history.length === 0) {
+ show("bot",
+  "Salam! Mən AYKA AI-yam. Söhbətimiz yadda qalacaq!"
+ );
+}
 </script>
 
 </body>
-  </html>
-  
+</html>
