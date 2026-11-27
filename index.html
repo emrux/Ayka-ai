@@ -240,6 +240,28 @@ function reply(t) {
    ? "Bəli! Yaddaşımda bunlar var:\n"+memory.join("\n")
    : "Hələ səni tanımaq üçün məlumatım yoxdur.";
 
+
+  // YENI SUAL-CAVABLAR
+
+  if(q.includes("kimsən") || q.includes("kimsen"))
+    return "Mən AYKA AI-yam. Sənin köməkçi süni intellektinəm!";
+
+  if(q.includes("kim yaratdı") || q.includes("kim yaratdi"))
+    return "Məni Emrux hazırlayır. Mən AYKA AI layihəsiyəm!";
+
+  if(q.includes("nə edə bilərsən") || q.includes("ne ede bilersen"))
+    return "Mən səninlə söhbət edə, suallara cavab verə və məlumatları yadda saxlaya bilərəm.";
+
+  if(q.includes("sağ ol") || q.includes("sag ol"))
+    return "Həmişə kömək etməyə hazıram!";
+
+  if(q.includes("səni sevirəm") || q.includes("seni sevirem"))
+    return "Çox mehribansan! Mən AYKA AI-yam.";
+
+  if(q.includes("hansı dildə") || q.includes("hansi dilde"))
+    return "Azərbaycan dilində danışa bilirəm!";
+
+   
  return "Bu suala hələ cavab verməyi öyrənməmişəm. Amma söhbətimizi yadda saxlayıram!";
 }
 
