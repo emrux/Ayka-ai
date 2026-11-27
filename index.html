@@ -98,12 +98,28 @@ button {
 <footer>
 <input id="msg" placeholder="AYKA-ya yaz...">
 <button onclick="send()">➤</button>
+<button onclick="startVoice()">🎙️</button>
 </footer>
 
 <script>
 const chat = document.getElementById("chat");
 const input = document.getElementById("msg");
+function startVoice() {
+  const Speech = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+  if (!Speech) {
+    alert("Bu brauzer səs tanımanı dəstəkləmir.");
+    return;
+  }
+
+  const recognition = new Speech();
+  recognition.lang = "az-AZ";
+  recognition.start();
+
+  recognition.onresult = function(event) {
+    input.value = event.results[0][0].transcript;
+  };
+ }
 let history = JSON.parse(
  localStorage.getItem("ayka_history") || "[]"
 );
