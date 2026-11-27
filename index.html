@@ -1,4 +1,4 @@
-
+ 
 <!DOCTYPE html>
 <html lang="az">
 <head>
@@ -87,7 +87,11 @@ button {
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#101010">
 </head>
-
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./service-worker.js");
+}
+</script>
 <body>
 
 <header>
